@@ -8,15 +8,20 @@
 
 namespace ServerApi;
 
-use ServerApi\Common\HttpRequest;
 use ServerApi\Common\WeChat;
 
-class GetAccessToken extends WeChat
+/**
+ * 获取token相关接口
+ *
+ * Class Token
+ * @package ServerApi
+ */
+class Token extends WeChat
 {
     /**
      * 获取access_token接口地址
      */
-    const GET_ACCESS_TOKEN_URL = '%stoken?appid=%s&grant_type=%s&secret=%s';
+    const GET_ACCESS_TOKEN_URL = '%s/cgi-bin/token?appid=%s&grant_type=%s&secret=%s';
 
     /**
      * @param array $options
@@ -25,16 +30,13 @@ class GetAccessToken extends WeChat
      */
     public function getAccessToken(array $options)
     {
-        if (empty($options['appid']) || empty($options['secret'])) {
-            die('Appid或Secret配置错误');
-        }
         $options['grant_type'] = $options['grant_type'] ?? 'client_credential';
         ksort($options);
         array_unshift($options, $this->wxApiHost);
         $uri = vsprintf(self::GET_ACCESS_TOKEN_URL, $options);
+        array_shift($options);
 
-        $response = HttpRequest::getInstance()->Request($uri, 'GET');
-        return $response->getBody()->getContents();
+        return $this->Request($uri, 'GET', $options);
     }
 
 }
